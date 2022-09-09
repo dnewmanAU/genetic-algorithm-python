@@ -5,6 +5,34 @@ from numpy.random import randint, rand
 
 
 class Candidate:
+    """
+    A candidate is a data frame containing randomised attributes
+
+    ...
+
+    Attributes
+    ----------
+    nationality : list[str]
+        one of its attributes
+    car_type : list[str]
+        one of its attributes
+    car_colour : list[str]
+        one of its attributes
+    departure : list[str]
+        one of its attributes
+    destination: list[str]
+        one of its attributes
+    attrbutes: dict[str, list[str]]
+        a combination of attributes to be passed to the data frame
+    state: DataFrame
+        The candidate containing its randomly shuffled data
+
+    Methods
+    -------
+    shuffle()
+        Randomly shuffle each attribute
+    """
+
     def __init__(self):
         self.nationality = [
             "British couple",
@@ -49,88 +77,97 @@ class Candidate:
         shuffle(self.destination)
 
 
-class Fitness:
-    def __init__(self, state):
-        self.state = state
-        self.fitness = 0
+def get_fitness(state):
+    """Get the fitness of the candidate.
 
-    def get_fitness(self):
-        if self.state.iloc[0, 4] == "Indian man":
-            self.fitness += 1
-        if self.state.iloc[2, 2] == "black":
-            self.fitness += 1
-        # Any single column
-        for y in range(5):
+    An optimal fitness is 15 when all clues are correct
+    and therefore the puzzle is solved.
+
+    Parameters
+    ----------
+    state: DataFrame
+        A data frame of attributes
+    """
+
+    fitness = 0
+
+    if state.iloc[0, 4] == "Indian man":
+        fitness += 1
+    if state.iloc[2, 2] == "black":
+        fitness += 1
+    # Any single column
+    for y in range(5):
+        if (
+            state.iloc[0, y] == "British couple"
+            and state.iloc[1, y] == "Toyota Camry"
+            and state.iloc[3, y] == "6:00am"
+        ):
+            fitness += 1
+        if state.iloc[1, y] == "Hyundai Accent" and state.iloc[3, y] == "9:00am":
+            fitness += 1
+        if state.iloc[1, y] == "Nissan X-Trail" and state.iloc[4, y] == "Sydney":
+            fitness += 1
+        if state.iloc[3, y] == "5:00am" and state.iloc[4, y] == "Newcastle":
+            fitness += 1
+        if state.iloc[2, y] == "red" and state.iloc[4, y] == "Tamworth":
+            fitness += 1
+        if state.iloc[2, y] == "black" and state.iloc[3, y] == "8:00am":
+            fitness += 1
+        if state.iloc[3, y] == "6:00am" and state.iloc[4, y] == "Tamworth":
+            fitness += 1
+        # Exactly to the left of
+        if y != 0:
             if (
-                self.state.iloc[0, y] == "British couple"
-                and self.state.iloc[1, y] == "Toyota Camry"
-                and self.state.iloc[3, y] == "6:00am"
+                state.iloc[4, y] == "Gold Coast"
+                and state.iloc[0, y - 1] == "French lady"
             ):
-                self.fitness += 1
+                fitness += 1
             if (
-                self.state.iloc[1, y] == "Hyundai Accent"
-                and self.state.iloc[3, y] == "9:00am"
+                state.iloc[2, y] == "green"
+                and state.iloc[0, y - 1] == "Chinese businessman"
             ):
-                self.fitness += 1
+                fitness += 1
             if (
-                self.state.iloc[1, y] == "Nissan X-Trail"
-                and self.state.iloc[4, y] == "Sydney"
+                state.iloc[1, y] == "Honda Civic"
+                and state.iloc[3, y] == "7:00am"
+                and state.iloc[4, y - 1] == "Gold Coast"
             ):
-                self.fitness += 1
+                fitness += 1
             if (
-                self.state.iloc[3, y] == "5:00am"
-                and self.state.iloc[4, y] == "Newcastle"
+                state.iloc[0, y] == "Indian man"
+                and state.iloc[0, y - 1] == "Chinese businessman"
             ):
-                self.fitness += 1
-            if self.state.iloc[2, y] == "red" and self.state.iloc[4, y] == "Tamworth":
-                self.fitness += 1
-            if self.state.iloc[2, y] == "black" and self.state.iloc[3, y] == "8:00am":
-                self.fitness += 1
+                fitness += 1
+        # Exactly to the right of
+        if y != 4:
             if (
-                self.state.iloc[3, y] == "6:00am"
-                and self.state.iloc[4, y] == "Tamworth"
+                state.iloc[1, y] == "Holden Barina"
+                and state.iloc[2, y] == "blue"
+                and state.iloc[0, y + 1] == "British couple"
             ):
-                self.fitness += 1
-            # Exactly to the left of
-            if y != 0:
-                if (
-                    self.state.iloc[4, y] == "Gold Coast"
-                    and self.state.iloc[0, y - 1] == "French lady"
-                ):
-                    self.fitness += 1
-                if (
-                    self.state.iloc[2, y] == "green"
-                    and self.state.iloc[0, y - 1] == "Chinese businessman"
-                ):
-                    self.fitness += 1
-                if (
-                    self.state.iloc[1, y] == "Honda Civic"
-                    and self.state.iloc[3, y] == "7:00am"
-                    and self.state.iloc[4, y - 1] == "Gold Coast"
-                ):
-                    self.fitness += 1
-                if (
-                    self.state.iloc[0, y] == "Indian man"
-                    and self.state.iloc[0, y - 1] == "Chinese businessman"
-                ):
-                    self.fitness += 1
-            # Exactly to the right of
-            if y != 4:
-                if (
-                    self.state.iloc[1, y] == "Holden Barina"
-                    and self.state.iloc[2, y] == "blue"
-                    and self.state.iloc[0, y + 1] == "British couple"
-                ):
-                    self.fitness += 1
-                if (
-                    self.state.iloc[2, y] == "white"
-                    and self.state.iloc[3, y + 1] == "7:00am"
-                ):
-                    self.fitness += 1
-        return self.fitness
+                fitness += 1
+            if state.iloc[2, y] == "white" and state.iloc[3, y + 1] == "7:00am":
+                fitness += 1
+    return fitness
 
 
 def selection(population, scores, pop_size):
+    """Select a candidate from the population.
+
+    Select three random candidates from the population and
+    return the randomly selected candidiate with the best score.
+
+    Parameters
+    ----------
+    state: DataFrame
+        A data frame of attributes
+
+    Returns
+    -------
+    DataFrame
+        the best randomly selected candidate
+    """
+
     selected = randint(pop_size)
     for r_candidate in randint(0, pop_size, 2):
         if scores[r_candidate] > scores[selected]:
@@ -139,16 +176,56 @@ def selection(population, scores, pop_size):
 
 
 def crossover(parent_1, parent_2, cross_rate):
+    """Crossover two parent candidates based on probability.
+
+    A pair of parents may be split at a random interval
+    and interchanged and combined to form two children.
+
+    Parameters
+    ----------
+    parent_1: DataFrame
+        A data frame of the first parent
+    parent_2: DataFrame
+        A data frame of the second parent
+    cross_rate: int
+        Probability of performing the crossover
+
+    Returns
+    -------
+    DataFrame
+        first crossover child of two parents or a copy of the first parent
+    DataFrame
+        second crossover child of two parents or a copy of the second parent
+    """
+
     child_1 = parent_1.copy()
     child_2 = parent_2.copy()
     if rand() < cross_rate:
         slice = randint(1, len(parent_1) - 1)
+        # sliced per attributes, not "spots"
         child_1 = pd.merge(parent_1.iloc[:slice], parent_2.iloc[slice:], how="outer")
         child_2 = pd.merge(parent_2.iloc[:slice], parent_1.iloc[slice:], how="outer")
     return [child_1, child_2]
 
 
 def mutation(child, mut_rate):
+    """Mutate a child based on probability.
+
+    Perform a mutatation on a child candidate with the amount of
+    mutation depending on probability. A mutation randomly swaps the order
+    of two elements of its attribute.
+
+    Parameters
+    ----------
+    child: DataFrame
+        A dataframe of attributes
+
+    Returns
+    -------
+    DataFrame
+        the child with mutated attributes
+    """
+
     for y_1 in range(len(child)):
         for x in range(len(child)):
             if rand() < mut_rate:
@@ -160,41 +237,49 @@ def mutation(child, mut_rate):
     return child
 
 
-def main():
-    # seed(100)
-    start_time = time()
+def genetic_algorithm(population, pop_size, cross_rate, mut_rate):
+    """Run the algorithm until a solution is found.
 
-    # total generations
-    generations = 0
-    # population size (even populations only)
-    pop_size = 130
-    # crossover rate
-    cross_rate = 0.9
-    # mutation rate
-    mut_rate = 0.05
+    The algorithm will continue to run until an optimal fitness
+    of 15 is found. At the 50th generation a new population will
+    be spawned as it is assumed a local extreme was found.
+    The time to find a solution can be highly variable as a result.
 
-    population = list()
-    for _ in range(pop_size):
-        population.append(Candidate().state)
+    Parameters
+    ----------
+    population: list[DataFrame]
+        A population of mostly unique data frames
+    pop_size: int
+        The length of the population
+    cross_rate: float
+        the crossover rate which influences the probability of crossover
+    mut_rate: float
+        The mutation rate which influences the probability of mutation
+    """
 
     # initial values
+    generations = 0
     best_state = 0
-    best_fitness = Fitness(population[0]).get_fitness()
+    best_fitness = get_fitness(population[0])
 
     print("Now running genetic algorithm...\n")
+    start_time = time()
 
     while best_fitness < 15:
         generations += 1
+
         scores = list()
         for candidate in population:
-            scores.append(Fitness(candidate).get_fitness())
+            scores.append(get_fitness(candidate))
         for i in range(pop_size):
             if scores[i] > best_fitness:
                 best_state = population[i]
                 best_fitness = scores[i]
+
         selected = list()
         for _ in range(pop_size):
             selected.append(selection(population, scores, pop_size))
+
         children = list()
         for i in range(0, pop_size, 2):
             parent_1 = selected[i]
@@ -202,6 +287,7 @@ def main():
             for child in crossover(parent_1, parent_2, cross_rate):
                 children.append(mutation(child, mut_rate))
         population = children
+
         if best_fitness == 15:  # solved
             end_time = time() - start_time
             print("\nSolved in: " + "{:.2f}".format(end_time) + " seconds")
@@ -221,15 +307,34 @@ def main():
                 "Currently at generation %d with a fitness of %d/15"
                 % (generations, best_fitness)
             )
-        if generations == 50:  # possibly stuck in a local extreme
+        if (
+            generations == 50 and best_fitness != 15
+        ):  # possibly stuck in a local extreme
             # initialise a new population of new candidates
-            print("\nPossibly reached local extreme. Initialising new population...\n")
+            print("\nStuck in local extreme. Initialising new population...\n")
             generations = 0
             population = list()
             for _ in range(pop_size):
                 population.append(Candidate().state)
             best_state = 0
-            best_fitness = Fitness(population[0]).get_fitness()
+            best_fitness = get_fitness(population[0])
+
+
+def main():
+    # seed(100)
+
+    # even populations only
+    pop_size = 130
+    # crossover rate
+    cross_rate = 0.9
+    # mutation rate
+    mut_rate = 0.05
+
+    population = list()
+    for _ in range(pop_size):
+        population.append(Candidate().state)
+
+    genetic_algorithm(population, pop_size, cross_rate, mut_rate)
 
 
 if __name__ == "__main__":
