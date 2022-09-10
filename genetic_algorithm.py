@@ -25,7 +25,7 @@ class Candidate:
     attrbutes: dict[str, list[str]]
         a combination of attributes to be passed to the data frame
     state: DataFrame
-        The candidate containing its randomly shuffled data
+        a data frame with randomly shuffled attributes
 
     Methods
     -------
@@ -80,13 +80,13 @@ class Candidate:
 def get_fitness(state):
     """Get the fitness of the candidate.
 
-    An optimal fitness is 15 when all clues are correct
-    and therefore the puzzle is solved.
+    An optimal fitness of 15 occurs when the data frame is in
+    the correct order and therefore the puzzle is solved.
 
     Parameters
     ----------
     state: DataFrame
-        A data frame of attributes
+        A data frame of attributes to be checked
     """
 
     fitness = 0
@@ -155,7 +155,7 @@ def selection(population, scores, pop_size):
     """Select a candidate from the population.
 
     Select three random candidates from the population and
-    return the randomly selected candidiate with the best score.
+    return the randomly selected candidiate with the best fitness.
 
     Parameters
     ----------
@@ -165,7 +165,7 @@ def selection(population, scores, pop_size):
     Returns
     -------
     DataFrame
-        the best randomly selected candidate
+        The best randomly selected candidate
     """
 
     selected = randint(pop_size)
@@ -179,7 +179,7 @@ def crossover(parent_1, parent_2, cross_rate):
     """Crossover two parent candidates based on probability.
 
     A pair of parents may be split at a random interval
-    and interchanged and combined to form two children.
+    and combined to form two unique children.
 
     Parameters
     ----------
@@ -211,9 +211,9 @@ def crossover(parent_1, parent_2, cross_rate):
 def mutation(child, mut_rate):
     """Mutate a child based on probability.
 
-    Perform a mutatation on a child candidate with the amount of
-    mutation depending on probability. A mutation randomly swaps the order
-    of two elements of its attribute.
+    Perform a mutation on a child candidate with the amount of
+    mutation depending on probability. A mutation, should it occur,
+    randomly swaps the order of two elements of its attribute.
 
     Parameters
     ----------
@@ -238,21 +238,21 @@ def mutation(child, mut_rate):
 
 
 def genetic_algorithm(population, pop_size, cross_rate, mut_rate):
-    """Run the algorithm until a solution is found.
+    """Run the algorithm until the solution is found.
 
     The algorithm will continue to run until an optimal fitness
-    of 15 is found. At the 50th generation a new population will
-    be spawned as it is assumed a local extreme was found.
-    The time to find a solution can be highly variable as a result.
+    of 15 is found. After the 50th generation, a new population will
+    be generated as it is assumed a local extreme was found.
+    The time to find a solution can be highly variable.
 
     Parameters
     ----------
     population: list[DataFrame]
-        A population of mostly unique data frames
+        A population of pseudo-random data frames
     pop_size: int
         The length of the population
     cross_rate: float
-        the crossover rate which influences the probability of crossover
+        The crossover rate which influences the probability of crossover
     mut_rate: float
         The mutation rate which influences the probability of mutation
     """
